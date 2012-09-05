@@ -1,0 +1,34 @@
+body {
+  font-family: verdana, arial, helvetica;
+  margin: 0px;
+}
+
+#outputContainer {
+  border: solid 1px;
+  padding: 3px;
+  height: 350px;
+}
+
+#codeContainer {
+  border-right: solid 1px;
+  border-left: solid 1px;
+}
+
+#debugContainer {
+  border: solid 1px;
+  height: 650px;
+}
+
+#leftSide {
+  float: left;
+  width: 50%;
+}
+
+#rightSide {
+  float: right;
+  width: 50%;
+}
+
+.CodeMirror {
+  font-size: 1.2em;
+}
