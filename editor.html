@@ -12,23 +12,40 @@
   <body>
     <h1>JSTutor</h1>
 <div><button id="btn">Submit</button></div>
-<div id="leftSide">
-  <div id="codeContainer"><textarea id="code" name="code">
-var sum = function(a, b) {
-return a + b;
+<table class="editor">
+  <tr>
+  <td id="codeContainer"><textarea id="code" name="code">
+function binarySearch(key, array) {
+  var low = 0;
+  var high = array.length - 1;
+
+  while (low <= high) {
+
+    var mid = Math.floor((low + high) / 2);
+    var value = array[mid];
+
+    if (value < key) {
+      low = mid + 1;
+    } else if (value > key) {
+      high = mid - 1;
+    } else {
+      return mid;
+    }
+  }
+  return -1;
 }
-var c = sum(1, 2);
-console.log('Hello world!');
-console.log(c);
-</textarea></div>
-  <div id="outputContainer">
-  </div>
+var res = binarySearch('d', ['a', 'b', 'c', 'd', 'e']);
+console.log(res);
+</textarea></td>
+  <td>
+    <div id="debugContainer">
+      <table id="debugview">
+      </table>
+    </div>
+  </td>
+</table>
+<div id="outputContainer">
 </div>
-<div id="rightSide">
-  <div id="debugContainer">
-  </div>
-</div>
-<div style="clear:both"></div>
 
     <script>
       var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
@@ -36,25 +53,16 @@ console.log(c);
         lineNumbers: true,
         matchBrackets: true,
         tabSize: 2,
+        onChange: function(from, to, text, next) {
+          var code = editor.getValue();
+          socket.emit('inspect', code);
+        }
       });
     </script>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/jquery-1.8.0.min.js"></script>
-    <script>
-      var socket = io.connect('http://localhost');
-      $('#btn').click(function() {
-        var code = editor.getValue();
-        socket.emit('inspect', code);
-      });
-      socket.on('output', function(data) {
-        console.log('output: ', data);
-        $('#outputContainer').append($('<div>').html(data));
-      });
-
-      socket.on('loginfo', function(loginfo) {
-        console.log('loginfo: ', loginfo);
-      });
-    </script>
+    <script src="js/debugrendering.js"></script>
+    <script src="js/client.js"></script>
   </body>
 </html>

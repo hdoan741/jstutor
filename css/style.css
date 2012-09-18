@@ -1,34 +1,52 @@
 body {
-  font-family: verdana, arial, helvetica;
+  font-family: monospace, arial, helvetica;
   margin: 0px;
+}
+
+td, tr, table{
+  border: none;
+  margin: 0px;
+  padding: 0px;
+}
+
+table {
+  border-spacing: 0px;
+}
+
+.editor {
+  width: 100%;
 }
 
 #outputContainer {
   border: solid 1px;
   padding: 3px;
-  height: 350px;
+  height: 200px;
+  overflow: scroll;
 }
 
 #codeContainer {
   border-right: solid 1px;
   border-left: solid 1px;
+  width: 600px;
 }
 
 #debugContainer {
   border: solid 1px;
-  height: 650px;
-}
-
-#leftSide {
-  float: left;
-  width: 50%;
-}
-
-#rightSide {
-  float: right;
-  width: 50%;
+  height: 300px;
+  width: 100%;
+  padding-left: 5px;
 }
 
 .CodeMirror {
-  font-size: 1.2em;
+}
+
+#debugview .debugVarName {
+}
+
+#debugview {
+  font-size: 0.8em;
+}
+
+.debugRow {
+  height: 13px;
 }
