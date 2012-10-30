@@ -13,19 +13,18 @@ var SourceExecution = function() {
         '--debug-brk=' + PORT,
         filename
       ]);
-      var eventEmitter = new EventEmitter();
       var debugReady = false;
       user_program.stdout.on('data', function(data) {
-        eventEmitter.emit('output', '' + data);
+        user_program.emit('output', '' + data);
       });
       user_program.stderr.on('data', function(data) {
         if (!debugReady) {
           debugReady = true;
-          eventEmitter.emit('debug_ready', filename, PORT);
+          user_program.emit('debug_ready', filename, PORT);
         }
-        eventEmitter.emit('error', '' + data);
+        user_program.emit('error', '' + data);
       });
-      return eventEmitter;
+      return user_program;
     }
   };
 };

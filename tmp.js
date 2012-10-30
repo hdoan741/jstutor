@@ -1,21 +1,7 @@
-function binarySearch(key, array) {
-  var low = 0;
-  var high = array.length - 1;
-
-  while (low <= high) {
-
-    var mid = Math.floor((low + high) / 2);
-    var value = array[mid];
-
-    if (value < key) {
-      low = mid + 1;
-    } else if (value > key) {
-      high = mid - 1;
-    } else {
-      return mid;
-    }
-  }
-  return -1;
-}
-var res = binarySearch('d', ['a', 'b', 'c', 'd', 'e', 'f']);
-console.log(res);
+var a = 1;
+var b = 2;
+var c = 3;
+var d = [1, 2];
+var e = {'a': 1, 'b': 2};
+var f = [d, e];
+var g = {'x': f, 'y': e};

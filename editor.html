@@ -11,58 +11,40 @@
   </head>
   <body>
     <h1>JSTutor</h1>
-<div><button id="btn">Submit</button></div>
 <table class="editor">
   <tr>
   <td id="codeContainer"><textarea id="code" name="code">
-function binarySearch(key, array) {
-  var low = 0;
-  var high = array.length - 1;
-
-  while (low <= high) {
-
-    var mid = Math.floor((low + high) / 2);
-    var value = array[mid];
-
-    if (value < key) {
-      low = mid + 1;
-    } else if (value > key) {
-      high = mid - 1;
-    } else {
-      return mid;
-    }
-  }
-  return -1;
-}
-var res = binarySearch('d', ['a', 'b', 'c', 'd', 'e']);
-console.log(res);
+var x = 5;
+var y = 10;
+var z = x + y;
 </textarea></td>
   <td>
+    <!--
     <div id="debugContainer">
       <table id="debugview">
       </table>
     </div>
+    -->
   </td>
 </table>
+<div><button id="btn">Submit</button></div>
+<!--
 <div id="outputContainer">
 </div>
+-->
 
     <script>
       var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
         autofocus: true,
         lineNumbers: true,
         matchBrackets: true,
-        tabSize: 2,
-        onChange: function(from, to, text, next) {
-          var code = editor.getValue();
-          socket.emit('inspect', code);
-        }
+        tabSize: 2
       });
     </script>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/jquery-1.8.0.min.js"></script>
-    <script src="js/debugrendering.js"></script>
+    <!-- <script src="js/debugrendering.js"></script> -->
     <script src="js/client.js"></script>
   </body>
 </html>
