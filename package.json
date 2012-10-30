@@ -1,0 +1,12 @@
+{
+  "name": "jstutor",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "3.0.0",
+    "socket.io": "0.9.10"
+  },
+  "engines": {
+    "node": "v0.8.6",
+    "npm": "1.1.48"
+  }
+}
