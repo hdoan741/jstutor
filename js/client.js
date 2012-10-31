@@ -1,4 +1,4 @@
-var socket = io.connect('http://localhost');
+var socket = io.connect(window.location.hostname);
 // var dbview = createDebugView($('#debugview'));
 // DebugRenderer.setView(dbview);
 
@@ -13,7 +13,7 @@ socket.on('output', function(data) {
 });
 
 socket.on('loginfo', function(logInfo) {
-  console.log('loginfo: ', JSON.stringify(logInfo));
+  console.log('loginfo: ', logInfo);
   // DebugRenderer.renderFresh(logInfo, refValues);
 });
 
