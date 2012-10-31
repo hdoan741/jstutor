@@ -2,7 +2,7 @@ var spawn = require('child_process').spawn,
     debugr = require('./lib/debugger.js');
 
 var SOURCE = 'tmp_code.js';
-var PORT = 5858;
+var PORT = 6000;
 
 user_program = spawn('node', [
   '--debug-brk=' + PORT,
