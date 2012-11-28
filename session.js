@@ -11,13 +11,16 @@ var Session = function(socket) {
   var session = {};
   var currentCode;
 
-  var attachDebugger = function(filename, port) {
+  var attachDebugger = function(filename, proc, port) {
     console.log('debug ready');
-    inspector = new SourceInspection(filename, port);
+    inspector = new SourceInspection(filename, proc, port);
     inspector.on('done', function(traces) {
+      if (traces.length >= 2) {
+        traces[traces.length - 1].line = traces[traces.length - 2].line;
+      }
       socket.emit('loginfo', {
         'code': currentCode,
-        'traces': traces
+        'trace': traces
       });
       isExecuting = false;
       if (pendingCode) {
@@ -39,10 +42,6 @@ var Session = function(socket) {
     }
     user_program = SourceExecution.execute(filename);
     user_program.on('debug_ready', attachDebugger);
-    user_program.on('output', function(data) {
-      // console.log('output', data);
-      socket.emit('output', data);
-    });
     user_program.on('error', function(data) {
       // console.log('error', data);
       socket.emit('error', data);

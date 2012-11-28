@@ -16,7 +16,7 @@ var SourceExecution = function() {
       var debugReady = false;
       user_program.stdout.on('data', function(data) {
         console.log('==== OUT: ', data);
-        user_program.emit('output', 'STDOUT: ' + data);
+        user_program.emit('output', '' +  data);
       });
       user_program.stderr.on('data', function(data) {
         data += '';
@@ -24,7 +24,7 @@ var SourceExecution = function() {
         if (!debugReady
             && data.indexOf('debugger listening on port') >= 0) {
           debugReady = true;
-          user_program.emit('debug_ready', filename, PORT);
+          user_program.emit('debug_ready', filename, user_program, PORT);
         }
         user_program.emit('error', 'STDERR: ' + data);
       });

@@ -6,14 +6,20 @@ var EventEmitter = require('events').EventEmitter
 // Output documentation:
 // https://github.com/pgbovine/OnlinePythonTutor/blob/master/v3/docs/opt-trace-format.md
 
-var SourceInspection = function(filename, port) {
+var SourceInspection = function(filename, proc, port) {
   EventEmitter.call(this);
+  var stdout = '';
   var traces = [];
   var self = this;
   var userScriptRef = null;
   var excludingVars =
       {'__dirname': 1, '__filename': 1, 'exports': 1,
         'module': 1, 'require': 1};
+
+  // it is expected, but not confirmed, that stdout will be in correct order.
+  proc.on('output', function(data) {
+    stdout += data;
+  });
 
   var dbgr = Debugger.attachDebugger(port);
   dbgr.on('close', function() {
@@ -50,6 +56,7 @@ var SourceInspection = function(filename, port) {
   });
 
   var extractSingleStep = function(btmsg, callback) {
+    console.log('======================================');
     // each frame extract: local variable & argument
     // need to fetch the value by reference
     // each frame = 1 stack level
@@ -59,12 +66,13 @@ var SourceInspection = function(filename, port) {
     var handles = [];
     var refValues = {};
     var variables = {};
+    var func_names = [];
 
     // placeholder. event can ben step_line or return
     stepData['event'] = 'step_line';
-    stepData['func_name'] = frames[0].func;
-    stepData['line'] = frames[0].line;
-
+    stepData['line'] = frames[0].line + 1; // in OPT line number start from 1
+    // function name is contained in a ref!
+    // stepData['func_name'] = frames[0].func;
     var processVar = function(v) {
       variables[v.name] = v;
       handles.push(v.value.ref);
@@ -72,21 +80,22 @@ var SourceInspection = function(filename, port) {
 
     for (var i = btmsg.body.toFrame - 1; i >= 0; i--) {
       var frame = frames[i];
-      console.log(frame);
 
       var filepath = extractFileNameFromSource(frame.text);
       if (!isUserScript(filepath)) {
         continue;
       }
 
-      console.log('-------------');
+      console.log(frame);
+      func_names.push(frames[i].func.ref);
+      handles.push(frames[i].func.ref);
+
       if (frame.locals) {
         for (var j = 0; j < frame.locals.length; j++) {
           processVar(frame.locals[j]);
         }
       }
 
-      console.log('+++++++++++++++');
       if (frame.arguments) {
         for (var j = 0; j < frame.arguments.length; j++) {
           var v = frame.arguments[j];
@@ -100,8 +109,12 @@ var SourceInspection = function(filename, port) {
     var postProcessing = function() {
       // parse heap & global / local values to fit the output format by OPT
       var renderResult = ReferenceParser.renderOPTFormat(refValues, variables);
-      stepData['variables'] = renderResult.variableDict;
+      stepData['func_name'] = refValues[frames[0].func.ref].name;
+      stepData['globals'] = renderResult.variableDict;
+      stepData['ordered_globals'] = Object.keys(variables).sort();
       stepData['heap'] = renderResult.heap;
+      stepData['stack_to_render'] = [];
+      stepData['stdout'] = stdout;
       traces.push(stepData);
       // step forward
       callback();

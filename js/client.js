@@ -14,6 +14,7 @@ socket.on('output', function(data) {
 
 socket.on('loginfo', function(logInfo) {
   console.log('loginfo: ', logInfo);
+  console.log(JSON.stringify(logInfo));
   // DebugRenderer.renderFresh(logInfo, refValues);
 });
 

@@ -13,6 +13,7 @@ var ReferenceParser = function() {
       return refs;
     },
 
+    // render format for online python tutor
     renderOPTFormat: function(refMaps, variables) {
       var heaps = {};
       var primitives = {};
