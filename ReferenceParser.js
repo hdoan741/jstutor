@@ -57,15 +57,20 @@ var ReferenceParser = function() {
         render(i);
       }
 
-      var variableDict = {};
+      var variableDicts = [];
       for (i in variables) {
-        v = variables[i];
-        variableDict[v.name] = render(v.value.ref);
+        localVars = variables[i];
+        var varDict = {};
+        for (j in localVars) {
+          var v = localVars[j];
+          varDict[v.name] = render(v.value.ref);
+        }
+        variableDicts.push(varDict);
       }
 
       return {
         'heap': heaps,
-        'variableDict': variableDict
+        'variableDicts': variableDicts
       }
     }
   }

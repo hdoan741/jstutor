@@ -65,7 +65,7 @@ var SourceInspection = function(filename, proc, port) {
     var stepData = {};
     var handles = [];
     var refValues = {};
-    var variables = {};
+    var variables = [];
     var func_names = [];
 
     // placeholder. event can ben step_line or return
@@ -87,12 +87,16 @@ var SourceInspection = function(filename, proc, port) {
       }
 
       console.log(frame);
-      func_names.push(frames[i].func.ref);
-      handles.push(frames[i].func.ref);
+      func_names.push(frame.func);
+      handles.push(frame.func.ref);
+
+      var localVars = {};
 
       if (frame.locals) {
         for (var j = 0; j < frame.locals.length; j++) {
-          processVar(frame.locals[j]);
+          var v = frame.locals[j];
+          localVars[v.name] = v;
+          handles.push(v.value.ref);
         }
       }
 
@@ -100,20 +104,41 @@ var SourceInspection = function(filename, proc, port) {
         for (var j = 0; j < frame.arguments.length; j++) {
           var v = frame.arguments[j];
           if (!excludingVars[v.name]) {
-            processVar(v);
+            localVars[v.name] = v;
+            handles.push(v.value.ref);
           }
         }
       }
+      variables.push(localVars);
     }
 
     var postProcessing = function() {
       // parse heap & global / local values to fit the output format by OPT
       var renderResult = ReferenceParser.renderOPTFormat(refValues, variables);
-      stepData['func_name'] = refValues[frames[0].func.ref].name;
-      stepData['globals'] = renderResult.variableDict;
-      stepData['ordered_globals'] = Object.keys(variables).sort();
+      console.log(' function names ', func_names);
+      stepData['func_name'] = refValues[func_names[0].ref].name;
+      stepData['globals'] = renderResult.variableDicts[0];
+      stepData['ordered_globals'] = Object.keys(variables[0]).sort();
       stepData['heap'] = renderResult.heap;
-      stepData['stack_to_render'] = [];
+      var allStacks = [];
+      for (var i = 1; i < func_names.length; i++) {
+        // higher stack level
+        var stackInfo = {};
+        console.log(func_names[i]);
+        console.log(refValues[func_names[i].ref]);
+        stackInfo['func_name'] = 'f' + i; // refValues[func_names[i].ref].text;
+        stackInfo['encoded_locals'] = renderResult.variableDicts[i];
+        stackInfo['ordered_varnames'] = Object.keys(variables[i]).sort();
+        stackInfo['is_highlighted'] = (i == func_names.length - 1);
+        stackInfo['frame_id'] = i;
+        stackInfo['unique_hash'] = stackInfo['func_name'] + stackInfo['frame_id'];
+        // extra
+        stackInfo['parent_frame_id_list'] = [];
+        stackInfo['is_zombie'] = false;
+        stackInfo['is_parent'] = false;
+        allStacks.push(stackInfo);
+      }
+      stepData['stack_to_render'] = allStacks;
       stepData['stdout'] = stdout;
       traces.push(stepData);
       // step forward
