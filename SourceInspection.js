@@ -33,6 +33,7 @@ var SourceInspection = function(filename, proc, port) {
         break;
       }
     }
+    console.log(util.inspect(traces, false, null));
     self.emit('done', traces);
   });
 

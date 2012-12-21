@@ -5,6 +5,7 @@ var app = express()
   , http = require('http')
   , server = http.createServer(app)
 //  , io = require('socket.io').listen(server)
+  , util = require('util')
   , net = require('net');
 
 // var Session = require('./session.js');
@@ -24,6 +25,7 @@ app.get('/', function(req, res) {
 app.get('/exec', function(req, res) {
   var user_script = req.query.user_script;
   Inspector.inspect(user_script, function(resp) {
+    console.log(util.inspect(resp, false, null));
     res.json(200, resp);
   });
 });
