@@ -64,13 +64,13 @@ var SourceInspection = function(filename, proc, port) {
     });
   });
 
-  var extractSingleStep = function(btmsg, callback) {
+  var extractSingleStep = function(backtraceData, callback) {
     console.log('======================================');
     // each frame extract: local variable & argument
     // need to fetch the value by reference
     // each frame = 1 stack level
     // TODO: extract scope information of a frame
-    var frames = btmsg.body.frames;
+    var frames = backtraceData.body.frames;
     var stepData = {};
     var handles = [];
     var refValues = {};
@@ -88,7 +88,7 @@ var SourceInspection = function(filename, proc, port) {
       handles.push(v.value.ref);
     };
 
-    for (var i = btmsg.body.toFrame - 1; i >= 0; i--) {
+    for (var i = backtraceData.body.toFrame - 1; i >= 0; i--) {
       var frame = frames[i];
 
       // do not go into system code
