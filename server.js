@@ -7,18 +7,28 @@ var app = express()
   , io = require('socket.io').listen(server)
   , net = require('net');
 
-var Session = require('./session.js');
+// var Session = require('./session.js');
+var Inspector = require('./static_backend.js');
 
 server.listen(PORT);
 
 app.use('/codemirror', express.static(__dirname + '/codemirror'));
 app.use('/js', express.static(__dirname + '/js'));
 app.use('/css', express.static(__dirname + '/css'));
+app.use('/example-code', express.static(__dirname + '/example-code'));
 
-app.get('/', function (req, res) {
-  res.sendfile('editor.html');
+app.get('/', function(req, res) {
+  res.sendfile('visualize.html');
 });
 
+app.get('/exec', function(req, res) {
+  var user_script = req.query.user_script;
+  Inspector.inspect(user_script, function(resp) {
+    res.json(200, resp);
+  });
+});
+
+/*
 io.configure(function() {
   io.set("transports", ["xhr-polling"]);
   io.set("polling duration", 10);
@@ -34,3 +44,4 @@ io.sockets.on('connection', function(socket) {
   // inspect using debugger, then notify the socket all inspection data
   session = new Session(socket);
 });
+*/
