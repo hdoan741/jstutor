@@ -16,10 +16,6 @@ var StaticInspector = function() {
       console.log('debug ready');
       inspector = new SourceInspection(filename, proc, port);
       inspector.on('done', function(traces) {
-        if (traces.length >= 2) {
-          traces[traces.length - 1].line = traces[traces.length - 2].line;
-        }
-
         callback({
           'code': currentCode,
           'trace': traces

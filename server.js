@@ -4,7 +4,7 @@ var express = require('express');
 var app = express()
   , http = require('http')
   , server = http.createServer(app)
-  , io = require('socket.io').listen(server)
+//  , io = require('socket.io').listen(server)
   , net = require('net');
 
 // var Session = require('./session.js');

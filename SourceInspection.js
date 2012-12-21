@@ -12,6 +12,7 @@ var SourceInspection = function(filename, proc, port) {
   var traces = [];
   var self = this;
   var userScriptRef = null;
+  var last_line = 1;
   var excludingVars =
       {'__dirname': 1, '__filename': 1, 'exports': 1,
         'module': 1, 'require': 1};
@@ -23,8 +24,16 @@ var SourceInspection = function(filename, proc, port) {
 
   var dbgr = Debugger.attachDebugger(port);
   dbgr.on('close', function() {
+    // need to correct the line number of the last trace
+    // because it is usually outside the program length
+    for (var i = traces.length - 2; i >= 0; i--) {
+      var stepData = traces[i];
+      if (!stepData['stack_to_render'] || stepData['stack_to_render'].length == 0) {
+        traces[traces.length - 1].line = stepData.line;
+        break;
+      }
+    }
     self.emit('done', traces);
-    console.log('User Dbg: Closed!');
   });
 
   dbgr.on('error', function(e) { console.log('User Dbg: Error! ', e); });
@@ -37,7 +46,7 @@ var SourceInspection = function(filename, proc, port) {
     // - otherwise step in
     // inspect obj.body.script.name
     var scriptPath = obj.body.script.name;
-    console.log('Break ', scriptPath, ': ', obj.body.sourceLine);
+    // console.log('Break ', scriptPath, ': ', obj.body.sourceLine);
     if (!isUserScript(scriptPath)) {
       // if it is not user_program => step out
       dbgr.request('continue', { arguments: { stepaction: 'out' } });
@@ -66,11 +75,12 @@ var SourceInspection = function(filename, proc, port) {
     var handles = [];
     var refValues = {};
     var variables = [];
-    var func_names = [];
+    var func_refs = [];
 
     // placeholder. event can ben step_line or return
     stepData['event'] = 'step_line';
     stepData['line'] = frames[0].line + 1; // in OPT line number start from 1
+
     // function name is contained in a ref!
     // stepData['func_name'] = frames[0].func;
     var processVar = function(v) {
@@ -81,13 +91,14 @@ var SourceInspection = function(filename, proc, port) {
     for (var i = btmsg.body.toFrame - 1; i >= 0; i--) {
       var frame = frames[i];
 
+      // do not go into system code
       var filepath = extractFileNameFromSource(frame.text);
       if (!isUserScript(filepath)) {
         continue;
       }
 
       console.log(frame);
-      func_names.push(frame.func);
+      func_refs.push(frame.func);
       handles.push(frame.func.ref);
 
       var localVars = {};
@@ -95,7 +106,7 @@ var SourceInspection = function(filename, proc, port) {
       if (frame.locals) {
         for (var j = 0; j < frame.locals.length; j++) {
           var v = frame.locals[j];
-          localVars[v.name] = v;
+          localVars[v.name] = v.value;
           handles.push(v.value.ref);
         }
       }
@@ -104,34 +115,43 @@ var SourceInspection = function(filename, proc, port) {
         for (var j = 0; j < frame.arguments.length; j++) {
           var v = frame.arguments[j];
           if (!excludingVars[v.name]) {
-            localVars[v.name] = v;
+            localVars[v.name] = v.value;
             handles.push(v.value.ref);
           }
         }
       }
+
+      if (frame.atReturn) {
+        stepData['event'] = 'return';
+        localVars['__return__'] = frame.returnValue;
+        handles.push(frame.returnValue.ref);
+      }
+
       variables.push(localVars);
     }
 
     var postProcessing = function() {
       // parse heap & global / local values to fit the output format by OPT
       var renderResult = ReferenceParser.renderOPTFormat(refValues, variables);
-      console.log(' function names ', func_names);
-      stepData['func_name'] = refValues[func_names[0].ref].name;
-      stepData['globals'] = renderResult.variableDicts[0];
+      // console.log(' function names ', func_refs);
+      stepData['func_name'] =
+        ReferenceParser.extractFuncName(refValues[func_refs[0].ref].source);
       stepData['ordered_globals'] = Object.keys(variables[0]).sort();
+      stepData['globals'] = renderResult.variableDicts[0];
       stepData['heap'] = renderResult.heap;
       var allStacks = [];
-      for (var i = 1; i < func_names.length; i++) {
+      for (var i = 1; i < func_refs.length; i++) {
         // higher stack level
         var stackInfo = {};
-        console.log(func_names[i]);
-        console.log(refValues[func_names[i].ref]);
-        stackInfo['func_name'] = 'f' + i; // refValues[func_names[i].ref].text;
+        console.log(func_refs[i]);
+        console.log(refValues[func_refs[i].ref]);
+        stackInfo['func_name'] =
+          ReferenceParser.extractFuncName(refValues[func_refs[i].ref].source);
         stackInfo['encoded_locals'] = renderResult.variableDicts[i];
         stackInfo['ordered_varnames'] = Object.keys(variables[i]).sort();
-        stackInfo['is_highlighted'] = (i == func_names.length - 1);
+        stackInfo['is_highlighted'] = (i == func_refs.length - 1);
         stackInfo['frame_id'] = i;
-        stackInfo['unique_hash'] = stackInfo['func_name'] + stackInfo['frame_id'];
+        stackInfo['unique_hash'] = stackInfo['func_name'] + '_f' + stackInfo['frame_id'];
         // extra
         stackInfo['parent_frame_id_list'] = [];
         stackInfo['is_zombie'] = false;
@@ -141,6 +161,7 @@ var SourceInspection = function(filename, proc, port) {
       stepData['stack_to_render'] = allStacks;
       stepData['stdout'] = stdout;
       traces.push(stepData);
+
       // step forward
       callback();
     }
@@ -152,14 +173,11 @@ var SourceInspection = function(filename, proc, port) {
         var innerRefs = ReferenceParser.extractRef(resp.body[refId]);
         refs = refs.concat(innerRefs);
       }
-      console.log(refs, refs.length);
       if (refs.length) {
         // repeat the lookup, because the refence can be nested.
-        console.log('inner refs');
         dbgr.request('lookup', { arguments: { handles: refs } }, processLookup);
       } else {
         // cleanup and step forward.
-        console.log('done looking up');
         postProcessing();
       }
     }

@@ -1,5 +1,9 @@
 var ReferenceParser = function() {
 
+  var getFuncName = function(src) {
+    return src.substring('function '.length, src.indexOf('{')).trim();
+  }
+
   return {
     // extract inner reference in a refValue
     // happens on array, etc.
@@ -12,6 +16,8 @@ var ReferenceParser = function() {
       }
       return refs;
     },
+
+    extractFuncName: getFuncName,
 
     // render format for online python tutor
     renderOPTFormat: function(refMaps, variables) {
@@ -30,7 +36,15 @@ var ReferenceParser = function() {
         }
         var refValue = refMaps[index];
         var renderedValue = null;
-        if (refValue.type == 'object') {
+        if (refValue.type == 'function') {
+          var func_name = getFuncName(refValue.source);
+          renderedValue = [
+            'FUNCTION',
+            func_name,
+            null
+          ];
+          heaps[index] = renderedValue;
+        } else if (refValue.type == 'object') {
           renderedValue = [];
           var startIndex = 0;
           if (refValue.className == 'Array') {
@@ -61,9 +75,9 @@ var ReferenceParser = function() {
       for (i in variables) {
         localVars = variables[i];
         var varDict = {};
-        for (j in localVars) {
-          var v = localVars[j];
-          varDict[v.name] = render(v.value.ref);
+        for (vname in localVars) {
+          var v = localVars[vname];
+          varDict[vname] = render(v.ref);
         }
         variableDicts.push(varDict);
       }
