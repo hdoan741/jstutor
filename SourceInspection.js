@@ -33,7 +33,7 @@ var SourceInspection = function(filename, proc, port) {
         break;
       }
     }
-    console.log(util.inspect(traces, false, null));
+    // console.log(util.inspect(traces, false, null));
     self.emit('done', traces);
   });
 
@@ -66,7 +66,7 @@ var SourceInspection = function(filename, proc, port) {
   });
 
   var extractSingleStep = function(backtraceData, callback) {
-    console.log('======================================');
+    // console.log('======================================');
     // each frame extract: local variable & argument
     // need to fetch the value by reference
     // each frame = 1 stack level
@@ -98,7 +98,7 @@ var SourceInspection = function(filename, proc, port) {
         continue;
       }
 
-      console.log(frame);
+      // console.log(frame);
       func_refs.push(frame.func);
       handles.push(frame.func.ref);
 
@@ -144,8 +144,8 @@ var SourceInspection = function(filename, proc, port) {
       for (var i = 1; i < func_refs.length; i++) {
         // higher stack level
         var stackInfo = {};
-        console.log(func_refs[i]);
-        console.log(refValues[func_refs[i].ref]);
+        // console.log(func_refs[i]);
+        // console.log(refValues[func_refs[i].ref]);
         stackInfo['func_name'] =
           ReferenceParser.extractFuncName(refValues[func_refs[i].ref].source);
         stackInfo['encoded_locals'] = renderResult.variableDicts[i];

@@ -3,7 +3,7 @@
 var spawn = require('child_process').spawn
   , EventEmitter = require('events').EventEmitter;
 
-var PORT = 6006;
+var PORT = 6060;
 
 var SourceExecution = function() {
 
@@ -15,12 +15,12 @@ var SourceExecution = function() {
       ]);
       var debugReady = false;
       user_program.stdout.on('data', function(data) {
-        console.log('==== OUT: ', data);
+        // console.log('==== OUT: ', data);
         user_program.emit('output', '' +  data);
       });
       user_program.stderr.on('data', function(data) {
         data += '';
-        console.log('==== ERR: ', data);
+        // console.log('==== ERR: ', data);
         if (!debugReady
             && data.indexOf('debugger listening on port') >= 0) {
           debugReady = true;

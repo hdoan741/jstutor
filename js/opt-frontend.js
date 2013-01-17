@@ -69,7 +69,7 @@ $(document).ready(function() {
   $("#embedLinkDiv").hide();
 
   pyInputCodeMirror = CodeMirror(document.getElementById('codeInputPane'), {
-    mode: 'python',
+    mode: 'javascript',
     lineNumbers: true,
     tabSize: 4,
     indentUnit: 4,
@@ -277,7 +277,7 @@ $(document).ready(function() {
   });
 
   $("#aliasExampleLink").click(function() {
-    $.get("example-code/aliasing.txt", setCodeMirrorVal);
+    $.get("example-code/intro.txt", setCodeMirrorVal);
     return false;
   });
 

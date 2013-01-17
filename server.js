@@ -25,7 +25,7 @@ app.get('/', function(req, res) {
 app.get('/exec', function(req, res) {
   var user_script = req.query.user_script;
   Inspector.inspect(user_script, function(resp) {
-    console.log(util.inspect(resp, false, null));
+    // console.log(util.inspect(resp, false, null));
     res.json(200, resp);
   });
 });
