@@ -1,5 +1,7 @@
 var PORT = process.env.PORT || 8080;
 
+console.log(PORT);
+
 var express = require('express');
 var app = express()
   , http = require('http')
@@ -12,6 +14,8 @@ var app = express()
 var Inspector = require('./static_backend.js');
 
 server.listen(PORT);
+
+console.log('blah blah');
 
 app.use('/codemirror', express.static(__dirname + '/codemirror'));
 app.use('/js', express.static(__dirname + '/js'));
