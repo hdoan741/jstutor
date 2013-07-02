@@ -35,6 +35,10 @@ var StaticInspector = function() {
         // socket.emit('error', 'Too many loops. Possibly infinite loop');
         user_program.kill('SIGKILL');
       });
+      inspector.on('error', function() {
+        console.log('Error in the debugger. Terminate user\' program');
+        user_program.kill('SIGKILL');
+      });
     }
 
     var executeSource = function(err, filename) {
