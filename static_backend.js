@@ -36,7 +36,7 @@ var StaticInspector = function() {
         user_program.kill('SIGKILL');
       });
       inspector.on('error', function() {
-        console.log('Error in the debugger. Terminate user\' program');
+        console.log('[static_server] Error in the debugger. Terminate user\' program');
         user_program.kill('SIGKILL');
       });
     }
@@ -48,8 +48,7 @@ var StaticInspector = function() {
       user_program = SourceExecution.execute(filename);
       user_program.on('debug_ready', attachDebugger);
       user_program.on('error', function(data) {
-        console.log('error', data);
-        // blah
+        // console.log('[UserProgram Error]', data);
       });
     }
 

@@ -22,6 +22,9 @@ var SourceInspection = function(filename, proc, port) {
     stdout += data;
   });
 
+
+  console.log('[SourceInspection] Attach Debugger to port', port);
+
   var dbgr = Debugger.attachDebugger(port);
   dbgr.on('close', function() {
     // need to correct the line number of the last trace
@@ -41,11 +44,14 @@ var SourceInspection = function(filename, proc, port) {
     console.log('User Dbg: Error! ', e);
     self.emit('error');
   });
+
   dbgr.on('exception', function(e) {
     console.log('User Dbg: Exception!: ', e);
     self.emit('error');
   });
+
   dbgr.on('connect', function() { console.log('User Dbg: Connected!'); });
+
   dbgr.on('break', function(obj) {
     // first stop when the code reach first line of user's code
     // request backtrace

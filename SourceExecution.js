@@ -20,11 +20,13 @@ var SourceExecution = function() {
       });
       user_program.stderr.on('data', function(data) {
         data += '';
-        // console.log('==== ERR: ', data);
+        console.log('[SourceExecution] : StdErr ', data);
         if (!debugReady
             && data.indexOf('debugger listening on port') >= 0) {
           debugReady = true;
-          user_program.emit('debug_ready', filename, user_program, PORT);
+          setTimeout(function() {
+            user_program.emit('debug_ready', filename, user_program, PORT);
+          }, 50);
         }
         user_program.emit('error', 'STDERR: ' + data);
       });
