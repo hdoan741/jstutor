@@ -37,6 +37,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // uncomment below if you're running on Google App Engine using the built-in app.yaml
 var python2_backend_script = 'exec';
 var python3_backend_script = null;
+var backend_script = 'exec';
 
 var appMode = 'edit'; // 'edit' or 'display'
 
@@ -126,19 +127,6 @@ $(document).ready(function() {
 
   $("#executeBtn").attr('disabled', false);
   $("#executeBtn").click(function() {
-
-    var backend_script = null;
-    if ($('#pythonVersionSelector').val() == '2') {
-        backend_script = python2_backend_script;
-    }
-    else if ($('#pythonVersionSelector').val() == '3') {
-        backend_script = python3_backend_script;
-    }
-
-    if (!backend_script) {
-      alert('Error: This server is not configured to run Python ' + $('#pythonVersionSelector').val());
-      return;
-    }
 
     $('#executeBtn').html("Please wait ... processing your code");
     $('#executeBtn').attr('disabled', true);
@@ -466,16 +454,6 @@ $(document).ready(function() {
     $("#aliasExampleLink").trigger('click');
   }
 
-  // ugh, ugly tristate due to the possibility of them being undefined
-  var cumulativeState = $.bbq.getState('cumulative');
-  if (cumulativeState !== undefined) {
-    $('#cumulativeModeSelector').val(cumulativeState);
-  }
-  var pyState = $.bbq.getState('py');
-  if (pyState !== undefined) {
-    $('#pythonVersionSelector').val(pyState);
-  }
-
   appMode = $.bbq.getState('mode'); // assign this to the GLOBAL appMode
   if ((appMode == "display") && preseededCode /* jump to display only with pre-seeded code */) {
     preseededCurInstr = Number($.bbq.getState('curInstr'));
@@ -513,8 +491,7 @@ $(document).ready(function() {
   $('#genUrlBtn').bind('click', function() {
     var myArgs = {code: pyInputCodeMirror.getValue(),
                   mode: appMode,
-                  cumulative: $('#cumulativeModeSelector').val(),
-                  py: $('#pythonVersionSelector').val()};
+                  cumulative: $('#cumulativeModeSelector').val()};
 
     if (appMode == 'display') {
       myArgs.curInstr = myVisualizer.curInstr;
@@ -529,7 +506,6 @@ $(document).ready(function() {
     assert(appMode == 'display');
     var myArgs = {code: pyInputCodeMirror.getValue(),
                   cumulative: $('#cumulativeModeSelector').val(),
-                  py: $('#pythonVersionSelector').val(),
                   curInstr: myVisualizer.curInstr,
                  };
 
