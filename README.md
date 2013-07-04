@@ -14,9 +14,9 @@ You will need to open TCP port 5858 to allow the server connect to the JS debugg
 
         $ npm install
 
-3. Run the server
+3. Run the server. The default port (of the server) is 8080.
 
-        $ PORT=80 node server.js
+        $ [PORT=80] node server.js
 
 3.1 You can also use the Forever package to keep the server running
 
